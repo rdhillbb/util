@@ -41,6 +41,46 @@ for _, query := range results {
 }
 ```
 
+## Message Template Format
+
+The utility requires a properly structured XML file containing message templates. Here's the expected format:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<messages>
+    <utilmessages>
+        <query_rewrite>
+            You are tasked with enhancing a user's query by creating multiple rewrites. 
+            This process aims to generate 15 more comprehensive and effective search 
+            queries while maintaining the original intent of the user's question or request. 
+            You are only to provide the results. No additional information is to be added.
+            Here is the user's original query:
+            <user_query>
+            %s
+            </user_query>
+            Place the results in a json string in the tag <results></results>
+        </query_rewrite>
+    </utilmessages>
+    <supportmessages>
+        <help>
+            Please provide assistance for the following request:
+            <request>
+            %s
+            </request>
+            Format your response with priority and action items.
+        </help>
+    </supportmessages>
+</messages>
+```
+
+The XML structure contains:
+- `<messages>`: Root element
+- `<utilmessages>`: Contains utility-related message templates
+  - `<query_rewrite>`: Template for query rewriting instructions
+    - Uses `%s` placeholder for the user's query
+- `<supportmessages>`: Contains support-related message templates
+  - `<help>`: Template for help requests
+
 ## Response Format
 
 The utility expects responses from Claude to be wrapped in XML tags:
