@@ -1,118 +1,109 @@
-# Query Rewrite Utility
+# Query Rewrite System
 
-A Go utility that leverages the Anthropic Claude API to enhance and expand search queries into multiple comprehensive variations.
+This system provides functionality to enhance and rewrite search queries using the Anthropic Claude API. It generates multiple variations of an input query while maintaining the original intent and adding contextual depth.
 
-## Purpose
+## Overview
 
-The `ReWriteQR` (Query Rewrite) function takes a single search query or question and generates 15 alternative, more robust versions while preserving the original intent. This helps in:
-- Expanding search coverage
-- Capturing different aspects of the same query
-- Improving search result relevancy
-- Generating comprehensive variations of the original question
+The Query Rewrite System consists of two main components:
+- A message template file (`messagefile.xml.txt`) containing the prompt structure
+- A Go implementation (`util.go`) that handles the query rewriting logic
 
-## Prerequisites
+## Message File Structure
 
-- Go 1.x or higher
-- Anthropic API key
-- Environment variables configured in `.env` file
-- Required dependencies:
-  - github.com/joho/godotenv
-  - github.com/rdhillbb/messagefile
+The system uses an XML-based message file that contains templates for different operations. The primary template used is the `query_rewrite` template under `utilmessages`. This template provides instructions to Claude for generating query variations.
 
-## Configuration
+### Template Variables
+The query rewrite template accepts two parameters:
+- `%d`: Number of query rewrites to generate
+- `%s`: Original query to be enhanced
 
-1. Create a `.env` file in your project root
-2. Add your Anthropic API key:
-```
-ANTHROPIC_API_KEY=your_api_key_here
-```
+## Environment Variables
 
-## Usage
+The following environment variables must be configured:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ANTHROPIC_API_KEY` | API key for Anthropic Claude service | Required |
+| `REWRITENUM` | Number of query rewrites to generate | 3 |
+
+## Core Functions
+
+### `ReWriteQR(query string) ([]string, error)`
+Main function that processes a query and returns an array of rewritten queries.
+
+### `buildPrompt(query string) string`
+Constructs the prompt using the message template and query parameters.
+
+### `makeAnthropicRequest(prompt, apiKey string) (*http.Response, error)`
+Handles the API communication with Anthropic's Claude service.
+
+### `processResponse(resp *http.Response) ([]string, error)`
+Processes the API response and extracts the rewritten queries.
+
+## Query Rewrite Guidelines
+
+The system generates variations that include:
+- Broader context queries
+- More specific/detailed queries
+- Alternative phrasings
+- Related subtopics
+- Different perspectives
+
+Each rewritten query:
+- Maintains the original intent
+- Uses natural language
+- Avoids redundancy
+- Includes relevant context
+- Varies in complexity
+- Must not exceed 200 characters
+
+## Example Usage
 
 ```go
-results, err := ReWriteQR("what are the health benefits of garlic")
-if err != nil {
-    log.Fatal(err)
+func main() {
+    results, err := ReWriteQR("what are the health benefits of garlic")
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    for i, result := range results {
+        fmt.Printf("%d: %s\n", i+1, result)
+    }
 }
-
-// Results will contain an array of 15 enhanced queries
-for _, query := range results {
-    fmt.Println(query)
-}
 ```
 
-## Message Template Format
+## API Configuration
 
-The utility requires a properly structured XML file containing message templates. Here's the expected format:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<messages>
-    <utilmessages>
-        <query_rewrite>
-            You are tasked with enhancing a user's query by creating multiple rewrites. 
-            This process aims to generate 15 more comprehensive and effective search 
-            queries while maintaining the original intent of the user's question or request. 
-            You are only to provide the results. No additional information is to be added.
-            Here is the user's original query:
-            <user_query>
-            %s
-            </user_query>
-            Place the results in a json string in the tag <results></results>
-        </query_rewrite>
-    </utilmessages>
-    <supportmessages>
-        <help>
-            Please provide assistance for the following request:
-            <request>
-            %s
-            </request>
-            Format your response with priority and action items.
-        </help>
-    </supportmessages>
-</messages>
-```
-
-The XML structure contains:
-- `<messages>`: Root element
-- `<utilmessages>`: Contains utility-related message templates
-  - `<query_rewrite>`: Template for query rewriting instructions
-    - Uses `%s` placeholder for the user's query
-- `<supportmessages>`: Contains support-related message templates
-  - `<help>`: Template for help requests
-
-## Response Format
-
-The utility expects responses from Claude to be wrapped in XML tags:
-```xml
-<results>
-["enhanced query 1", "enhanced query 2", ...]
-</results>
-```
-
-## Error Handling
-
-The utility includes comprehensive error handling for:
-- Missing API keys
-- API response errors
-- JSON parsing issues
-- Empty or invalid responses
+The system uses the Claude 3 Sonnet model (`claude-3-sonnet-20240229`) with the following settings:
+- Max tokens: 1000
+- API Version: 2023-06-01
 
 ## Dependencies
 
-- Uses Claude 3 Sonnet model for query enhancement
-- Requires properly formatted XML message templates
-- Processes responses using regex pattern matching
+- github.com/rdhillbb/messagefile
+- github.com/joho/godotenv
 
-## Keywords
+## Error Handling
 
-- Query Expansion
-- Search Enhancement
-- Natural Language Processing
-- Query Rewriting
-- Claude API
-- Go Utility
-- Search Optimization
-- Question Reformulation
-- Semantic Search
-- Query Preprocessing
+The system includes comprehensive error handling for:
+- Missing environment variables
+- API communication issues
+- Response parsing errors
+- Invalid JSON formatting
+- Empty results
+
+## Installation
+
+1. Clone the repository
+2. Create a `.env` file with required environment variables
+3. Install dependencies: `go get`
+4. Build: `go build`
+
+## Contributing
+
+When contributing to this project, please ensure that:
+- All new message templates are added to the XML file
+- Environment variables are documented
+- Error handling follows the established pattern
+- Tests are included for new functionality

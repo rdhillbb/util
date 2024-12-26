@@ -2,12 +2,42 @@
 <messages>
     <utilmessages>
         <query_rewrite>
-		You are tasked with enhancing a user's query by creating multiple rewrites. This process aims to generate 15 more comprehensive and effective search queries while maintaining the original intent of the user's question or request. You are only to provide the results. No additional informaiton is to be added.
-Here is the user's original query:
+		You are tasked with enhancing a user's query by creating multiple rewrites. Generate exactly %d variations that include:
+- Broader context queries
+- More specific/detailed queries
+- Alternative phrasings
+- Related subtopics
+- Different perspectives on the same topic
+
+Original query:
 <user_query>
 %s
 </user_query>
-Place the results in a json string in the tag <results></results>
+
+Ensure each rewrite:
+- Maintains the original intent
+- Uses natural language
+- Avoids redundancy
+- Includes relevant context
+- Varies in complexity (from simple to comprehensive)
+
+Each rewrite should:
+- Be a complete, grammatically correct question or search phrase
+- Not exceed 200 characters
+- Not be a mere synonym replacement
+- Include relevant qualifying terms
+- Avoid leading articles (a, an, the) when possible for search efficiency
+
+Avoid:
+- Duplicate concepts with different wording
+- Overly verbose phrasings
+- Queries that deviate from the original intent
+- Generic modifiers (best, top, great) unless in original query
+
+Format the response as a JSON array of strings:
+<results>
+["query 1", "query 2", "query 3", ...]
+</results>
         </query_rewrite>
     </utilmessages>
 

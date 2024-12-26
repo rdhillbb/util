@@ -1,4 +1,5 @@
 package util 
+//package main 
 
 import (
 	"bytes"
@@ -9,10 +10,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
-	"regexp"
-	"strings"
 )
 
 // AnthropicResponse represents the structure of the response from Anthropic API
@@ -46,6 +48,23 @@ func ReWriteQR(query string) ([]string, error) {
 	return stringArray, nil
 }
 
+func getRewriteNum() int {
+    numStr := os.Getenv("REWRITENUM")
+    if numStr == "" {
+        return 3 // Default value
+    }
+    
+    num, err := strconv.Atoi(numStr)
+    if err != nil {
+        log.Printf("Invalid REWRITENUM value: %s, using default of 3", numStr)
+        return 3
+    }
+    if num > 8 {
+	    num=8
+     }
+    return num
+}
+
 func buildPrompt(query string) string {
 	// Retrieve a message
 	msg, err := messagefile.GetMSG("utilmessages:query_rewrite")
@@ -54,7 +73,11 @@ func buildPrompt(query string) string {
 		return ""
 	}
 
-	return fmt.Sprintf(msg, query)
+	// Get number of rewrites
+	numRewrites := getRewriteNum()
+	
+	// Now using two format specifiers - one for number of rewrites, one for query
+	return fmt.Sprintf(msg, numRewrites, query)
 }
 
 func makeAnthropicRequest(prompt, apiKey string) (*http.Response, error) {
@@ -93,7 +116,6 @@ func processResponse(resp *http.Response) ([]string, error) {
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned non-200 status: %d, body: %s", resp.StatusCode, string(body))
 	}
@@ -129,12 +151,12 @@ func processResponse(resp *http.Response) ([]string, error) {
 	return stringArray, nil
 }
 
-func xmain() {
+func testmain() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	results, err := ReWriteQR("what are the health benefits of garlic")
+	results, err := ReWriteQR("I am doing resesarch on Jefferson's view of democracy. for this I need to examine all aspects of his life, business, family and poitical career.")
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
